@@ -36,7 +36,7 @@ spotifySearch = (searchTerm) => {
     spotify
         .search({ type: 'track', query: searchTerm })
         .then(function (response) {
-            console.log(response[0]);
+            console.log(response);
         })
         .catch(function (err) {
             console.log(err);
