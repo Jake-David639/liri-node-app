@@ -10,4 +10,6 @@ Available Commands:
 
    * `movie-this`: query the OMDB API with the remaining cli arguments as the seach term.
 
-   * `do-what-it-says`: 
+   * `do-what-it-says`: processes text from the random.txt file and runs the associated operations.
+
+   
