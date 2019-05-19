@@ -1,9 +1,11 @@
 // importing dependancies
 const fs = require('fs');
+
 // const inquire = require('inquirer');
 const axios = require('axios');
 const Spotify = require('node-spotify-api');
-const dotenv = require("dotenv").config();
+const dotenv = require('dotenv').config();
+const moment = require('moment');
 
 // importing keys from keys.js
 var keys = require("./keys.js");
@@ -17,22 +19,35 @@ var searchTerm = '';
 
 //OMBD API call function, default search term of "Mr. Nobody" is set if no search term is entered.
 movieThis = (searchTerm) => {
-    if(!searchTerm){
+    if (!searchTerm) {
         searchTerm = 'Mr. Nobody';
     };
+
     axios.get("http://www.omdbapi.com/?t=" + searchTerm + "&plot=short&apikey=" + keys.omdb.key).then(
         function (response) {
             // print movie info to the terminal
             // console.log(response.data.Ratings);
-            console.log(`
-    Title: ${response.data.Title}
-    Year released: ${response.data.Released}
-    IMDB rating: ${response.data.imdbRating}
-    Rotten Tomatoes rating: ${response.data.Ratings[1].Value}
-    Filmed in: ${response.data.Country}
-    Languages: ${response.data.Language}
-    Plot Summary: ${response.data.Plot}
-    Lead Actors: ${response.data.Actors}`);
+            let movieData = `
+Title: ${response.data.Title}
+Year released: ${response.data.Released}
+IMDB rating: ${response.data.imdbRating}
+Rotten Tomatoes rating: ${response.data.Ratings[1].Value}
+Filmed in: ${response.data.Country}
+Languages: ${response.data.Language}
+Plot Summary: ${response.data.Plot}
+Lead Actors: ${response.data.Actors}`;
+
+            fs.appendFile('log.txt', '\nCommand: movieThis for ' + searchTerm, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+
+            fs.appendFile('log.txt', movieData, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+
+            console.log(movieData);
         }
     ).catch(function (err) {
         console.log(err);
@@ -43,10 +58,40 @@ movieThis = (searchTerm) => {
 checkConcerts = (searchTerm) => {
     axios.get("https://rest.bandsintown.com/artists/" + searchTerm + "/events?app_id=" + keys.bandsInTown.key).then(
         function (response) {
-            // Then we print out the imdbRating
-            console.log(`${response.data[0].lineup}
-            ${response.data[0].offers}`);
-            // console.log(response);
+            if (response.data.length == 0) {
+                return console.log('No shows found for the requested band.');
+            }
+            let concertData = ``;
+
+            // `Upcomming shows for: ${searchTerm}
+            // --------------------------------
+            // ${response.data[0].venue.name}
+            // ${response.data[0].venue.city}, ${response.data[0].venue.region}
+            // ${response.data[0].venue.country}            
+            // On ${response.data[0].datetime}
+            // `;
+
+            concertData += `\nUpcomming shows for: ${searchTerm}`;
+            response.data.forEach(element => {
+                var date = moment(element.datetime).format('MM/DD/YYYY');
+                concertData += `\n--------------------------------`;
+                concertData += `\n${element.venue.name}`;
+                concertData += `\n   ${element.venue.city}, ${element.venue.region}`;
+                concertData += `\n          ${element.venue.country}`;
+                concertData += `\n                  On ${date}`;
+            });
+
+            console.log(concertData);
+
+            fs.appendFile('log.txt', '\nCommand: checkConcerts for ' + searchTerm, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+            fs.appendFile('log.txt', concertData, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+            
         }
     ).catch(function (err) {
         console.log(err);
@@ -54,18 +99,36 @@ checkConcerts = (searchTerm) => {
 };
 
 spotifySearch = (searchTerm) => {
+    if (!searchTerm) {
+        searchTerm = 'The Sign';
+    }
     spotify
         .search({ type: 'track', query: searchTerm })
         .then(function (response) {
-            console.log(response);
+
+            let trackData = `
+${response.tracks.items[0].album.artists[0].name}
+${response.tracks.items[0].name}
+${response.tracks.items[0].preview_url}
+${response.tracks.items[0].album.name}
+`;
+
+            fs.appendFile('log.txt', '\nCommand: spotifySearch for ' + searchTerm, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+            fs.appendFile('log.txt', trackData, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+            });
+
+            console.log(trackData);
         })
         .catch(function (err) {
             console.log(err);
         });
 
 };
-
-
 
 // switch for handling each of the search types
 switch (searchType) {
@@ -85,7 +148,7 @@ switch (searchType) {
         break;
 
     case 'do-what-it-says':
-        var fileInput = fs.readFile('./random.txt', 'utf8',function(){
+        var fileInput = fs.readFile('./random.txt', 'utf8', function () {
             fileInput.split(',');
             switch (fileInput[0]) {
                 case 'concert-this':
