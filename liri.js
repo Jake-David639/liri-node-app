@@ -37,7 +37,7 @@ Languages: ${response.data.Language}
 Plot Summary: ${response.data.Plot}
 Lead Actors: ${response.data.Actors}`;
 
-            fs.appendFile('log.txt', '\nCommand: movieThis for ' + searchTerm, (err) => {
+            fs.appendFile('log.txt', '\n\nCommand: movieThis for ' + searchTerm, (err) => {
                 if (err) throw err;
                 console.log('The file has been saved!');
             });
@@ -63,14 +63,6 @@ checkConcerts = (searchTerm) => {
             }
             let concertData = ``;
 
-            // `Upcomming shows for: ${searchTerm}
-            // --------------------------------
-            // ${response.data[0].venue.name}
-            // ${response.data[0].venue.city}, ${response.data[0].venue.region}
-            // ${response.data[0].venue.country}            
-            // On ${response.data[0].datetime}
-            // `;
-
             concertData += `\nUpcomming shows for: ${searchTerm}`;
             response.data.forEach(element => {
                 var date = moment(element.datetime).format('MM/DD/YYYY');
@@ -83,7 +75,7 @@ checkConcerts = (searchTerm) => {
 
             console.log(concertData);
 
-            fs.appendFile('log.txt', '\nCommand: checkConcerts for ' + searchTerm, (err) => {
+            fs.appendFile('log.txt', '\n\nCommand: checkConcerts for ' + searchTerm, (err) => {
                 if (err) throw err;
                 console.log('The file has been saved!');
             });
@@ -110,10 +102,9 @@ spotifySearch = (searchTerm) => {
 ${response.tracks.items[0].album.artists[0].name}
 ${response.tracks.items[0].name}
 ${response.tracks.items[0].preview_url}
-${response.tracks.items[0].album.name}
-`;
+${response.tracks.items[0].album.name}`;
 
-            fs.appendFile('log.txt', '\nCommand: spotifySearch for ' + searchTerm, (err) => {
+            fs.appendFile('log.txt', '\n\nCommand: spotifySearch for ' + searchTerm, (err) => {
                 if (err) throw err;
                 console.log('The file has been saved!');
             });
@@ -127,7 +118,6 @@ ${response.tracks.items[0].album.name}
         .catch(function (err) {
             console.log(err);
         });
-
 };
 
 // switch for handling each of the search types
@@ -148,8 +138,10 @@ switch (searchType) {
         break;
 
     case 'do-what-it-says':
-        var fileInput = fs.readFile('./random.txt', 'utf8', function () {
-            fileInput.split(',');
+        fs.readFile('./random.txt', 'utf8', (err, data) => {
+            if (err) throw err;
+            console.log(data);
+            fileInput = data.split(',');
             switch (fileInput[0]) {
                 case 'concert-this':
                     checkConcerts(fileInput[1]);
